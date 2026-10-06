@@ -1,0 +1,5 @@
+Decompiling C:\Users\Administrator\Documents\MyFile\RainCam_reverse\RecoveredProject\Assets\Shaders_Reconstructed\BBP_Quad.compute.dxbc...
+
+*** Be careful of the precision issue of 32bit floating point value due to MS disassembler's bug!
+    Creating HLSL representation
+  -> C:\Users\Administrator\Documents\MyFile\RainCam_reverse\RecoveredProject\Assets\Shaders_Reconstructed\BBP_Quad.compute.hlsl

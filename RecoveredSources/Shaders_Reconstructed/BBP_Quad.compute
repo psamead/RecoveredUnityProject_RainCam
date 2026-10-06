@@ -1,0 +1,62 @@
+#pragma kernel CSParticle
+
+struct Particle
+{
+    float3 position;
+    float3 velocity;
+    float life;
+};
+
+struct Vertex
+{
+    float3 position;
+    float2 uv;
+    float life;
+};
+
+RWStructuredBuffer<Particle> particleBuffer;
+RWStructuredBuffer<Vertex> vertexBuffer;
+
+float deltaTime;
+float2 mousePosition;
+float halfSize;
+
+[numthreads(256, 1, 1)]
+void CSParticle(uint3 id : SV_DispatchThreadID)
+{
+    Particle particle = particleBuffer[id.x];
+
+    particle.life -= deltaTime;
+
+    float3 acceleration = normalize(float3(mousePosition, 0.0) - particle.position);
+    particle.velocity += acceleration;
+    particle.position += particle.velocity * deltaTime * 0.01;
+
+    if (particle.life < 0.0)
+    {
+        particle.position = float3(mousePosition, 0.0);
+        particle.velocity = float3(0.0, 0.0, 0.0);
+        particle.life = 4.0;
+    }
+
+    particleBuffer[id.x] = particle;
+
+    uint baseVertex = id.x * 6;
+    float3 bottomLeft = particle.position + float3(-halfSize, -halfSize, 0.0);
+    float3 topLeft = particle.position + float3(-halfSize, halfSize, 0.0);
+    float3 topRight = particle.position + float3(halfSize, halfSize, 0.0);
+    float3 bottomRight = particle.position + float3(halfSize, -halfSize, 0.0);
+
+    vertexBuffer[baseVertex + 0].position = bottomLeft;
+    vertexBuffer[baseVertex + 0].life = particle.life;
+    vertexBuffer[baseVertex + 1].position = topLeft;
+    vertexBuffer[baseVertex + 1].life = particle.life;
+    vertexBuffer[baseVertex + 2].position = topRight;
+    vertexBuffer[baseVertex + 2].life = particle.life;
+    vertexBuffer[baseVertex + 3].position = bottomLeft;
+    vertexBuffer[baseVertex + 3].life = particle.life;
+    vertexBuffer[baseVertex + 4].position = topRight;
+    vertexBuffer[baseVertex + 4].life = particle.life;
+    vertexBuffer[baseVertex + 5].position = bottomRight;
+    vertexBuffer[baseVertex + 5].life = particle.life;
+}
