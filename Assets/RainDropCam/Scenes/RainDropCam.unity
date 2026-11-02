@@ -115,7 +115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &8
 GameObject:
   m_ObjectHideFlags: 0
@@ -755,7 +755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f342bb6af82e67b083371efd28480267, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particleCount: 250
+  particleCount: 500
   material: {fileID: 2100000, guid: cadbddd8c39c91544904e951a1de4bed, type: 2}
   shader: {fileID: 7200000, guid: 2c7ccd430410a3d4cb0ebf559fa9f50f, type: 3}
   quadSize: 0.2

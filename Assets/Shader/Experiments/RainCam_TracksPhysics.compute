@@ -1,0 +1,49 @@
+// Ping-pong splat simulation for MouseCS.cs (rebuilt - not in the shipped exe).
+// Kernel names / resource names are the ones MouseCS.cs binds: FlashInput, PhysicsUpdate,
+// Input, PreviousState, Result, Width, Height, ElapsedTime. Diffuse + decay step in the style of
+// the CCA workshop's TrailAgentCompute DiffuseTextureKernel.
+#pragma kernel FlashInput
+#pragma kernel PhysicsUpdate
+
+Texture2D<float4> Input;          // MouseCS clearTexture (Alpha8)
+RWTexture2D<float4> PreviousState;
+RWTexture2D<float4> Result;
+
+float Width;
+float Height;
+float ElapsedTime;
+
+static const float DecayPerSecond = 0.6;  // how fast the wiped area fogs over again
+static const float DiffuseMix = 0.5;      // 0 = no spread, 1 = full 3x3 blur each step
+
+[numthreads(8, 8, 1)]
+void FlashInput (uint3 id : SV_DispatchThreadID)
+{
+    // reset both buffers to the (empty) input
+    float4 c = float4(0, 0, 0, Input[id.xy].a);
+    PreviousState[id.xy] = c;
+    Result[id.xy] = c;
+}
+
+[numthreads(8, 8, 1)]
+void PhysicsUpdate (uint3 id : SV_DispatchThreadID)
+{
+    int w = (int)Width;
+    int h = (int)Height;
+    float4 sum = 0;
+    for (int x = -1; x <= 1; x++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            int2 p = int2((id.x + x + w) % w, (id.y + y + h) % h);  // wrapMode = Repeat
+            sum += PreviousState[p];
+        }
+    }
+    float4 centre = PreviousState[id.xy];
+    float4 diffused = lerp(centre, sum / 9.0, DiffuseMix);
+    float decay = exp(-DecayPerSecond * ElapsedTime);
+    // MouseCS.Update stamps the brush into the texture that is bound here as Result, then this
+    // kernel overwrites it - in the original the stroke was lost every step. Keep the stamp by
+    // taking the max of the diffused state and what is already in Result.
+    Result[id.xy] = saturate(max(diffused, Result[id.xy]) * decay);
+}

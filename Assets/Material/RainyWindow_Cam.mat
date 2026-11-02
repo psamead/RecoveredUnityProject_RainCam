@@ -28,21 +28,17 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Blur: 0.744
-    - _HazeStrength: 1
+    - _Blur: 0.83
     - _Distortion: -4.5
-    - _DropSize: 0.25
+    - _DropSize: 2
     - _EdgeSoftness: 0.1
     - _InnerDistorsion: -5
     - _InnerDropSize: 1
     - _InnerSize: 8
     - _Radius: 0.1
-    - _Ratio: 1.777778
+    - _Ratio: 1
     - _Size: 7.14
     - _T: 1
-    - _TrailClearStrength: 0.65
-    - _TrailSoftness: 0.18
-    - _TrailRecovery: 0.35
     m_Colors:
     - _Position: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

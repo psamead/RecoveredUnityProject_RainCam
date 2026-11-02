@@ -26,7 +26,7 @@ public class BBP_Quad : MonoBehaviour
 
 	private const int SIZE_VERTEX = 24;
 
-	public int particleCount = 250;
+	public int particleCount = 50;
 
 	public Material material;
 
@@ -50,8 +50,6 @@ public class BBP_Quad : MonoBehaviour
 	private GameObject go;
 
 	private Material streamMat;
-
-	private readonly float[] mousePositionValues = new float[2];
 
 	public Camera camRT;
 
@@ -113,14 +111,12 @@ public class BBP_Quad : MonoBehaviour
 
 	private void OnRenderObject()
 	{
-		RenderTexture previous = RenderTexture.active;
 		if (!DebugMode)
 		{
 			Graphics.SetRenderTarget(testRT);
 		}
 		material.SetPass(0);
 		Graphics.DrawProceduralNow(MeshTopology.Triangles, 6, numParticles);
-		RenderTexture.active = previous;
 	}
 
 	private void OnDestroy()
@@ -128,34 +124,14 @@ public class BBP_Quad : MonoBehaviour
 		if (particleBuffer != null)
 		{
 			particleBuffer.Release();
-			particleBuffer = null;
-		}
-		if (vertexBuffer != null)
-		{
-			vertexBuffer.Release();
-			vertexBuffer = null;
-		}
-		if (testRT != null)
-		{
-			testRT.Release();
-			testRT = null;
 		}
 	}
 
 	private void Update()
 	{
-		Camera main = Camera.main;
-		if (main != null)
-		{
-			Vector3 screen = Input.mousePosition;
-			screen.z = Mathf.Abs(main.transform.position.z - transform.position.z);
-			Vector3 world = main.ScreenToWorldPoint(screen);
-			cursorPos.Set(world.x, world.y);
-		}
-		mousePositionValues[0] = cursorPos.x;
-		mousePositionValues[1] = cursorPos.y;
+		float[] values = new float[2] { cursorPos.x, cursorPos.y };
 		shader.SetFloat("deltaTime", Time.deltaTime);
-		shader.SetFloats("mousePosition", mousePositionValues);
+		shader.SetFloats("mousePosition", values);
 		shader.Dispatch(kernelID, groupSizeX, 1, 1);
 	}
 

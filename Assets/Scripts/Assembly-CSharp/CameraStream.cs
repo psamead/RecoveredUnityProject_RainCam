@@ -4,12 +4,6 @@ public class CameraStream : MonoBehaviour
 {
 	public int currentCamIndex;
 
-	public int requestedWidth = 1280;
-
-	public int requestedHeight = 720;
-
-	public int requestedFPS = 30;
-
 	private static WebCamTexture CurrentCam;
 
 	private WebCamDevice[] devices;
@@ -27,7 +21,9 @@ public class CameraStream : MonoBehaviour
 		devices = WebCamTexture.devices;
 		if (devices != null && devices.Length > 0)
 		{
-			currentCamIndex = ((currentCamIndex % devices.Length) + devices.Length) % devices.Length;
+			// Recovery note: the shipped scene serializes currentCamIndex = 1. On a machine with a single
+			// webcam the original threw IndexOutOfRange here; fall back to camera 0 only in that case.
+			if (currentCamIndex >= devices.Length) currentCamIndex = 0;
 			InitCam(currentCamIndex);
 			width = CurrentCam.width;
 			height = CurrentCam.height;
@@ -38,22 +34,20 @@ public class CameraStream : MonoBehaviour
 		}
 		else
 		{
-			Debug.LogWarning("No camera devices detected");
+			Debug.Log("No Camera Detected");
 		}
 	}
 
 	private void Start()
 	{
-		Material material = GetComponent<Renderer>().material;
-		material.SetTexture("_MainTex", CurrentCam);
-		material.SetFloat("_Ratio", ratio);
-		material.SetFloat("_PlaneAspect", transform.lossyScale.x / Mathf.Max(transform.lossyScale.y, 0.0001f));
+		GetComponent<Renderer>().material.SetTexture("_MainTex", CurrentCam);
+		GetComponent<Renderer>().material.SetFloat("_Ratio", ratio);
 	}
 
 	private void InitCam(int index)
 	{
 		currentDevice = devices[index];
-		CurrentCam = new WebCamTexture(currentDevice.name, requestedWidth, requestedHeight, requestedFPS);
+		CurrentCam = new WebCamTexture(currentDevice.name);
 		CurrentCam.Play();
 	}
 
@@ -66,13 +60,13 @@ public class CameraStream : MonoBehaviour
 				CurrentCam.Stop();
 				CurrentCam = null;
 			}
-			if (devices != null && devices.Length > 0)
+			if (devices.Length != 0)
 			{
-				currentCamIndex = (currentCamIndex + 1) % devices.Length;
-				InitCam(currentCamIndex);
-				Material material = GetComponent<Renderer>().material;
-				material.SetTexture("_MainTex", CurrentCam);
-				material.SetFloat("_Ratio", ratio);
+				currentCamIndex++;
+				int index = currentCamIndex % 2;
+				if (index >= devices.Length) index = 0; // recovery guard, see OnEnable
+				InitCam(index);
+				GetComponent<Renderer>().material.SetTexture("_MainTex", CurrentCam);
 			}
 		}
 	}
